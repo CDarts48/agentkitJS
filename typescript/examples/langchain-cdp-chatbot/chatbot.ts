@@ -16,8 +16,9 @@ import { ChatOpenAI } from "@langchain/openai";
 import * as dotenv from "dotenv";
 import * as fs from "fs";
 import * as readline from "readline";
+import path from 'path';
 
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 /**
  * Validates that required environment variables are set
@@ -25,6 +26,8 @@ dotenv.config();
  * @throws {Error} - If required environment variables are missing
  * @returns {void}
  */
+
+
 function validateEnvironment(): void {
   const missingVars: string[] = [];
 
@@ -246,7 +249,6 @@ async function chooseMode(): Promise<"chat" | "auto"> {
   const question = (prompt: string): Promise<string> =>
     new Promise(resolve => rl.question(prompt, resolve));
 
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     console.log("\nAvailable modes:");
     console.log("1. chat    - Interactive chat mode");
@@ -255,6 +257,8 @@ async function chooseMode(): Promise<"chat" | "auto"> {
     const choice = (await question("\nChoose a mode (enter number or name): "))
       .toLowerCase()
       .trim();
+
+    console.log(`User selected: ${choice}`); // Add this line for debugging
 
     if (choice === "1" || choice === "chat") {
       rl.close();
@@ -272,8 +276,16 @@ async function chooseMode(): Promise<"chat" | "auto"> {
  */
 async function main() {
   try {
+    console.log("Starting Agent...");
+    console.log("Environment Variables:");
+    console.log("OPENAI_API_KEY:", process.env.OPENAI_API_KEY ? "Loaded" : "Not Loaded");
+    console.log("CDP_API_KEY_NAME:", process.env.CDP_API_KEY_NAME ? "Loaded" : "Not Loaded");
+    console.log("CDP_API_KEY_PRIVATE_KEY:", process.env.CDP_API_KEY_PRIVATE_KEY ? "Loaded" : "Not Loaded");
+
     const { agent, config } = await initializeAgent();
     const mode = await chooseMode();
+
+    console.log(`Selected mode: ${mode}`); // Add this line for debugging
 
     if (mode === "chat") {
       await runChatMode(agent, config);
