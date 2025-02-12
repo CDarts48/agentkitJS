@@ -12,8 +12,10 @@ const Chatbot = () => {
     setMessages([...messages, userMessage]);
 
     try {
+      console.log('Sending request to backend...');
       const response = await axios.post('http://localhost:3001/chat', { input });
-      const botMessage = { sender: 'bot', text: response.data.response };
+      console.log('Received response from backend:', response.data);
+      const botMessage = { sender: 'bot', text: response.data.response }; // Corrected line
       setMessages([...messages, userMessage, botMessage]);
     } catch (error) {
       console.error('Error:', error);

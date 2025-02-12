@@ -26,8 +26,6 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
  * @throws {Error} - If required environment variables are missing
  * @returns {void}
  */
-
-
 function validateEnvironment(): void {
   const missingVars: string[] = [];
 
@@ -65,7 +63,7 @@ const WALLET_DATA_FILE = "wallet_data.txt";
  *
  * @returns Agent executor and config
  */
-async function initializeAgent() {
+export async function initializeAgent() {
   try {
     // Initialize LLM
     const llm = new ChatOpenAI({
@@ -155,8 +153,7 @@ async function initializeAgent() {
  * @param config - Agent configuration
  * @param interval - Time interval between actions in seconds
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function runAutonomousMode(agent: any, config: any, interval = 10) {
+export async function runAutonomousMode(agent: any, config: any, interval = 10) {
   console.log("Starting autonomous mode...");
 
   // eslint-disable-next-line no-constant-condition
@@ -193,8 +190,7 @@ async function runAutonomousMode(agent: any, config: any, interval = 10) {
  * @param agent - The agent executor
  * @param config - Agent configuration
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function runChatMode(agent: any, config: any) {
+export async function runChatMode(agent: any, config: any) {
   console.log("Starting chat mode... Type 'exit' to end.");
 
   const rl = readline.createInterface({
@@ -233,77 +229,4 @@ async function runChatMode(agent: any, config: any) {
   } finally {
     rl.close();
   }
-}
-
-/**
- * Choose whether to run in autonomous or chat mode based on user input
- *
- * @returns Selected mode
- */
-async function chooseMode(): Promise<"chat" | "auto"> {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  const question = (prompt: string): Promise<string> =>
-    new Promise(resolve => rl.question(prompt, resolve));
-
-  while (true) {
-    console.log("\nAvailable modes:");
-    console.log("1. chat    - Interactive chat mode");
-    console.log("2. auto    - Autonomous action mode");
-
-    const choice = (await question("\nChoose a mode (enter number or name): "))
-      .toLowerCase()
-      .trim();
-
-    console.log(`User selected: ${choice}`); // Add this line for debugging
-
-    if (choice === "1" || choice === "chat") {
-      rl.close();
-      return "chat";
-    } else if (choice === "2" || choice === "auto") {
-      rl.close();
-      return "auto";
-    }
-    console.log("Invalid choice. Please try again.");
-  }
-}
-
-/**
- * Start the chatbot agent
- */
-async function main() {
-  try {
-    console.log("Starting Agent...");
-    console.log("Environment Variables:");
-    console.log("OPENAI_API_KEY:", process.env.OPENAI_API_KEY ? "Loaded" : "Not Loaded");
-    console.log("CDP_API_KEY_NAME:", process.env.CDP_API_KEY_NAME ? "Loaded" : "Not Loaded");
-    console.log("CDP_API_KEY_PRIVATE_KEY:", process.env.CDP_API_KEY_PRIVATE_KEY ? "Loaded" : "Not Loaded");
-
-    const { agent, config } = await initializeAgent();
-    const mode = await chooseMode();
-
-    console.log(`Selected mode: ${mode}`); // Add this line for debugging
-
-    if (mode === "chat") {
-      await runChatMode(agent, config);
-    } else {
-      await runAutonomousMode(agent, config);
-    }
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error("Error:", error.message);
-    }
-    process.exit(1);
-  }
-}
-
-if (require.main === module) {
-  console.log("Starting Agent...");
-  main().catch(error => {
-    console.error("Fatal error:", error);
-    process.exit(1);
-  });
 }
